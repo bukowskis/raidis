@@ -10,7 +10,6 @@ Gem::Specification.new do |spec|
 
   spec.files       = Dir['Rakefile', '{bin,lib,man,test,spec}/**/*', 'README*', 'LICENSE*'] & `git ls-files -z`.split("\0")
 
-  spec.add_dependency('trouble')
   spec.add_dependency('redis_failover')
   spec.add_dependency('redis-namespace')
 

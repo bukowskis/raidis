@@ -9,12 +9,10 @@ module Raidis
 
   def self.available!
     @available = true
-    nil
   end
 
   def self.unavailable!
     @available = false
-    nil
   end
 
 end

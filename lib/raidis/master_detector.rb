@@ -1,13 +1,14 @@
 require 'ostruct'
 
 module Raidis
-  class MasterDetector
+  module MasterDetector
+    extend self
 
     BaseError            = Class.new(RuntimeError)
     NoRedisMaster        = Class.new(BaseError)
     MultipleRedisMasters = Class.new(BaseError)
 
-    def Server < OpenStruct
+    class Server < OpenStruct
       def master?
         !!self.master
       end
@@ -31,7 +32,7 @@ module Raidis
     end
 
     def servers!
-      config.redis_servers.to_s.split(',').map do |redis_server|
+      Raidis.config.redis_servers.to_s.split(',').map do |redis_server|
         server = Server.new
         server.endpoint, server.port = server.split(':')
         begin
@@ -39,7 +40,7 @@ module Raidis
             server.is_master = Redis.new(host: server.endpoint, port: server.port).info['role'] == 'master'
           end
         rescue *known_redis_connection_exceptions => exception
-          config.logger.info "Raidis::MasterDetector could not connect to #{server.endpoint}:#{server.port}... #{exception}"
+          config.logger.info "Raidis::MasterDetector could not connect to #{server.endpoint}:#{server.port} because of #{exception.class}"
         end
         server
       end
