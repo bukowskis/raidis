@@ -13,7 +13,7 @@ module Raidis
     end
 
     attr_accessor :redis_namespace, :redis_timeout
-    attr_writer :logger, :redis_db
+    attr_writer :logger, :redis_db, :unavailability_timeout
 
     def logger
       @logger ||= Logger.new(STDOUT)
@@ -31,14 +31,18 @@ module Raidis
       Pathname.new path
     end
 
+    def unavailability_timeout
+      @unavailability_timeout ||= 15  # seconds
+    end
+
     def master
       unless info_file_path.exist?
-        Trouble.notify(InfoFilePathNotFound.new, message: 'Raidis could not find the redis master info file', location: info_file_path) if defined?(Trouble)
+        Trouble.notify(InfoFilePathNotFound.new, code: :info_file_not_found, message: 'Raidis could not find the redis master info file', location: info_file_path) if defined?(Trouble)
         return
       end
 
       unless info_file_path.readable?
-        Trouble.notify(InfoFilePathNotFound.new, message: 'The redis master info file exists but is not readable for Raidis', location: info_file_path) if defined?(Trouble)
+        Trouble.notify(InfoFilePathNotFound.new, code: :info_file_not_readable, message: 'The redis master info file exists but is not readable for Raidis', location: info_file_path) if defined?(Trouble)
         return
       end
 
@@ -46,7 +50,7 @@ module Raidis
       server.endpoint, server.port = info_file_path.read.strip.to_s.split(':')
 
       unless server.endpoint
-        Trouble.notify(InfoFilePathNotFound.new, message: 'Raidis found the redis master info file, but there was no valid endpoint in it', location: info_file_path, content: info_file_path.read.inspect) if defined?(Trouble)
+        Trouble.notify(InfoFilePathNotFound.new, code: :invalid_info_file_content, message: 'Raidis found the redis master info file, but there was no valid endpoint in it', location: info_file_path, content: info_file_path.read.inspect) if defined?(Trouble)
         return
       end
       server

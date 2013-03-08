@@ -72,6 +72,27 @@ describe Raidis do
   end
 
   context 'when not connected' do
+    before do
+      Raidis.config.stub!(:info_file_path).and_return mock(:info_file_path, exist?: true, readable?: true, read: '127.0.0.1:0')
+      Raidis.reconnect!
+    end
+
+    context 'unavailability timeout' do
+      before do
+        Raidis.config.unavailability_timeout = 5  # Seconds
+      end
+
+      describe '.available?' do
+        it 'becomes available again after the unavailability_timeout' do
+          raidis.should_not be_available
+          Timecop.travel Time.now + 4
+          raidis.should_not be_available
+          Timecop.travel Time.now + 1
+          raidis.should be_available
+        end
+      end
+    end
+
     context 'because the Network is unreachable' do
       before do
         Raidis.config.stub!(:info_file_path).and_return mock(:info_file_path, exist?: true, readable?: true, read: '192.0.2.1')  # RFC 5737

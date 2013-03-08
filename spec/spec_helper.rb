@@ -1,3 +1,4 @@
+require 'timecop'
 require 'raidis'
 
 def ensure_class_or_module(full_name, class_or_module)
@@ -40,6 +41,7 @@ RSpec.configure do |config|
   # Global after hooks
   config.after do
     Raidis.reset!
+    Timecop.return
   end
 
 end

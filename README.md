@@ -1,10 +1,10 @@
 # Raid-is
 
-Raidis is a wrapper for [redis_failover](https://github.com/ryanlecompte/redis_failover). It's called `Raidis`, because `redis_failover_failover` sounded silly. Besides, I want it to be flexible enough to wrap around further libraries in the future.
+Raidis is yet another failover solution for Redis.
 
 You won't need to use `Redis.new` or `RedisFailover.new` anymore. You'll find your ready-to-go redis in `Raidis.redis`.
 
-However, wherever you use plan on using Redis in your application, make sure to first check the connection like so:
+However, wherever you use plan on using Redis in your application, make sure to first check the availability like so:
 
 ```ruby
 if Raidis.available?

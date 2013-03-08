@@ -34,15 +34,16 @@ module Raidis
         Redis::BaseConnectionError,
         IOError,
         Timeout::Error,
-        Errno::ENETUNREACH,
-        Errno::EHOSTUNREACH,
+        Errno::EADDRNOTAVAIL,
+        Errno::EAGAIN,
+        Errno::EBADF,
+        Errno::ECONNABORTED,
         Errno::ECONNREFUSED,
         Errno::ECONNRESET,
-        Errno::EAGAIN,
+        Errno::EHOSTUNREACH,
+        Errno::EINVAL,
+        Errno::ENETUNREACH,
         Errno::EPIPE,
-        Errno::ECONNABORTED,
-        Errno::EBADF,
-        Errno::EINVAL
       ]
     end
 
