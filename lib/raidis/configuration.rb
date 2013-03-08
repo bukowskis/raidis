@@ -13,7 +13,7 @@ module Raidis
     end
 
     attr_accessor :redis_namespace, :redis_timeout, :redis_db
-    attr_writer :logger, :unavailability_timeout
+    attr_writer :logger, :unavailability_timeout, :master
 
     def logger
       @logger ||= Logger.new(STDOUT)
@@ -32,21 +32,28 @@ module Raidis
     end
 
     def master
-      unless info_file_path.exist?
-        Trouble.notify(InfoFilePathNotFound.new, code: :info_file_not_found, message: 'Raidis could not find the redis master info file', location: info_file_path) if defined?(Trouble)
-        return
+      unless @master
+        unless info_file_path.exist?
+          Trouble.notify(InfoFilePathNotFound.new, code: :info_file_not_found, message: 'Raidis could not find the redis master info file', location: info_file_path) if defined?(Trouble)
+          return
+        end
+
+        unless info_file_path.readable?
+          Trouble.notify(InfoFilePathNotFound.new, code: :info_file_not_readable, message: 'The redis master info file exists but is not readable for Raidis', location: info_file_path) if defined?(Trouble)
+          return
+        end
       end
 
-      unless info_file_path.readable?
-        Trouble.notify(InfoFilePathNotFound.new, code: :info_file_not_readable, message: 'The redis master info file exists but is not readable for Raidis', location: info_file_path) if defined?(Trouble)
-        return
-      end
-
+      content = @master || info_file_path.read
       server = Master.new
-      server.endpoint, server.port = info_file_path.read.strip.to_s.split(':')
+      server.endpoint, server.port = content.strip.to_s.split(':')
 
       unless server.endpoint
-        Trouble.notify(InfoFilePathNotFound.new, code: :invalid_info_file_content, message: 'Raidis found the redis master info file, but there was no valid endpoint in it', location: info_file_path, content: info_file_path.read.inspect) if defined?(Trouble)
+        if @master
+          Trouble.notify(InfoFilePathNotFound.new, code: :invalid_master, message: 'Raidis does not understand the config.master value you provided', value: config.master.inspect) if defined?(Trouble)
+        else
+          Trouble.notify(InfoFilePathNotFound.new, code: :invalid_info_file_content, message: 'Raidis found the redis master info file, but there was no valid endpoint in it', location: info_file_path, content: info_file_path.read.inspect) if defined?(Trouble)
+        end
         return
       end
       server

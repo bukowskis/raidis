@@ -73,7 +73,7 @@ describe Raidis do
 
   context 'when not connected' do
     before do
-      Raidis.config.stub!(:info_file_path).and_return mock(:info_file_path, exist?: true, readable?: true, read: '127.0.0.1:0')
+      Raidis.config.master = '127.0.0.1:0'
       Raidis.reconnect!
     end
 
@@ -95,7 +95,7 @@ describe Raidis do
 
     context 'because the Network is unreachable' do
       before do
-        Raidis.config.stub!(:info_file_path).and_return mock(:info_file_path, exist?: true, readable?: true, read: '192.0.2.1')  # RFC 5737
+        Raidis.config.master = '192.0.2.1'  # RFC 5737
         Raidis.reconnect!
       end
 
@@ -124,7 +124,7 @@ describe Raidis do
 
     context 'because of a wrong port' do
       before do
-        Raidis.config.stub!(:info_file_path).and_return mock(:info_file_path, exist?: true, readable?: true, read: '127.0.0.1:80')
+        Raidis.config.master = '127.0.0.1:80'
         Raidis.reconnect!
       end
 
