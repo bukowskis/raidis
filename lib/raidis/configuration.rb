@@ -12,15 +12,11 @@ module Raidis
       end
     end
 
-    attr_accessor :redis_namespace, :redis_timeout
-    attr_writer :logger, :redis_db, :unavailability_timeout
+    attr_accessor :redis_namespace, :redis_timeout, :redis_db
+    attr_writer :logger, :unavailability_timeout
 
     def logger
       @logger ||= Logger.new(STDOUT)
-    end
-
-    def redis_db
-      @redis_db ||= 0
     end
 
     def info_file_path
