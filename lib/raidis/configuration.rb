@@ -1,18 +1,17 @@
-
 module Raidis
-
-  InfoFilePathNotFound = Class.new(RuntimeError)
-
-  class Master
-    attr_accessor :endpoint
-    attr_writer :port
-
-    def port
-      @port ||= 6379
-    end
-  end
-
   class Configuration
+
+    InfoFilePathNotFound = Class.new(RuntimeError)
+
+    class Master
+      attr_accessor :endpoint
+      attr_writer :port
+
+      def port
+        @port ||= 6379
+      end
+    end
+
     attr_accessor :redis_namespace, :redis_timeout
     attr_writer :logger, :redis_db
 
@@ -53,13 +52,21 @@ module Raidis
       server
     end
   end
+end
 
-  def self.config
+module Raidis
+  extend self
+
+  def config
     @config ||= Configuration.new
   end
 
-  def self.configure(&block)
+  def configure(&block)
     yield config
   end
 
+  def reset!
+    config = nil
+    reconnect!
+  end
 end

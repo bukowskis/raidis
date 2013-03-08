@@ -5,8 +5,6 @@ module Raidis
       !!@available
     end
 
-    private
-
     def available!
       @available = true
     end
