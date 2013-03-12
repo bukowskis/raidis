@@ -50,7 +50,7 @@ Example:
 ```ruby
 Raidis.configure do |config|
 
-  config.logger          = Rails.logger                # default is Logger.new(STDOUT)
+  config.logger          = Rails.logger                # default is Rails.logger (if defined) otherwise: Logger.new(STDOUT)
   config.redis_namespace = :myapp                      # default is nil
   config.redis_db        = (Rails.env.test? ? 1 : 0)   # default is whatever Redis.new has as default
   config.redis_timeout   = 3  # seconds                # default is whatever Redis.new has as default

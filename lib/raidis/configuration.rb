@@ -16,7 +16,13 @@ module Raidis
     attr_writer :logger, :unavailability_timeout, :master
 
     def logger
-      @logger ||= Logger.new(STDOUT)
+      @logger ||= begin
+        if defined?(Rails)
+          Rails.logger
+        else
+          Logger.new(STDOUT)
+        end
+      end
     end
 
     def info_file_path
