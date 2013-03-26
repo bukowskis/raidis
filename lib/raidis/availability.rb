@@ -10,24 +10,24 @@ module Raidis
     end
 
     def available!
-      @last_availability_check = Time.now
+      checking_availability
       @available = true
     end
 
     def unavailable!
-      @last_availability_check = Time.now
+      checking_availability
       @available = false
     end
 
     private
 
-    def unavailability_age_in_seconds
-      return 0 unless @last_availability_check
-      (now - @last_availability_check).to_i
+    def checking_availability
+      @last_availability_check = Time.now.to_i
     end
 
-    def now
-      Time.now
+    def unavailability_age_in_seconds
+      return 0 unless @last_availability_check
+      Time.now.to_i - @last_availability_check.to_i
     end
 
   end

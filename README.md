@@ -27,9 +27,9 @@ Raidis.redis.class # => Redis::Namespace
 
 # How does it work?
 
-Whenever you call `Raidis.redis`, the connectivity to the remote redis server is monitored. If connectivity problems occur, or you're trying to make write-calls to a Redis slave, a `Raidis::ConnectionError` is raised.
+Whenever you call `Raidis.redis`, the connectivity to the remote redis server is monitored. If connectivity problems occur, or you're trying to make write-calls to a Redis slave, Raidis will immediately reload the `/etc/redis_master` file and try to perform the call to Redis again (hoping to have connected to a working redis server this time). If that second attempt failed (or you set `config.retries` to `0`) a `Raidis::ConnectionError` is raised. 
 
-As soon as one of those connection errors occurs, the global variable `Raidis.available?` turns from `true` to `false` and any further damage can be mitigated, by simply not making any further calls to redis. You should inform your end-users about the outage in a friendly manner. E.g. like so:
+You should not have too many retries, because you don't want the end user's browser to hang and wait too long. That's where the `#available?` feature comes in. As soon as one of those connection errors occurs, the global variable `Raidis.available?` turns from `true` to `false` and any further damage can be mitigated, by simply not making any further calls to redis. You should inform your end-users about the outage in a friendly manner. E.g. like so:
 
 ```ruby
 if Raidis.available?
@@ -41,7 +41,11 @@ end
 
 Note that it is one of the design goals of this gem that there are no performance penalties when using `.available?`.
 
-After 15 seconds (or whichever timeout you configure), `Raidis.available?` turns to `true` again automatically and the file `/etc/redis_master` is read again in order to find the remote redis server. Use `Raidis.reconnect!` to evoke the end of that unavailability period manually.
+After 15 seconds (or whichever timeout you configure), `Raidis.available?` turns to `true` again automatically and the file `/etc/redis_master` is read again in order to find the remote redis server. If you wish, you may use `Raidis.reconnect!` to evoke the end of that unavailability period manually.
+
+# Connection Pools
+
+If you need to maintain a ConnectionPool with multiple connections to Redis (e.g. when you use [Sidekiq](https://github.com/mperham/sidekiq/issues/794)), you may use the something like `ConnectionPool.new { Raidis.redis! }` (note the exclamation mark) to populate your pool. `.raidis!` returns a new connection each time you call it. Note that `Raidis.available?` is a global variable, so if any of the pools fail, Raidis will go into unavailable mode as described above.
 
 ## Configuration
 
@@ -55,6 +59,7 @@ Raidis.configure do |config|
   config.redis_db        = (Rails.env.test? ? 1 : 0)   # default is whatever Redis.new has as default
   config.redis_timeout   = 3  # seconds                # default is whatever Redis.new has as default
 
+  config.retries = 3  # times                          # default is 1
   config.unavailability_timeout = 60  # seconds        # default is 15 seconds
   config.info_file_path         = '/opt/redis_server'  # default is '/etc/redis_master'
 

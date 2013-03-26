@@ -12,13 +12,21 @@ module Raidis
   extend self
   extend Availability
 
+  # Public: The singleton Redis connection object.
+  #
+  # Returns a RedisWrapper instance.
+  #
   def redis
     return @redis if @redis
-    @redis = RedisWrapper.new redis!
+    @redis = redis!
     connected?
     @redis
   end
 
+  # Public: Updates the #available? flag by actually testing the Redis connection.
+  #
+  # Returns true or false.
+  #
   def connected?
     return unavailable! unless @redis
     @redis.setex(:raidis, 1, :rocks) && available!
@@ -26,16 +34,18 @@ module Raidis
     unavailable!
   end
 
+  # Public: Evokes a fresh lookup of the Redis server endpoint.
+  #
   def reconnect!
     @redis = nil
     redis
   end
 
-  private
-
+  # Public: Creates a brand-new failsafe-wrapped connection to Redis.
+  # This is ONLY useful if you need to maintain your own ConnectionPool.
+  # See https://github.com/mperham/sidekiq/issues/794
+  #
   def redis!
-    return unless master = config.master
-    raw_redis = Redis.new db: config.redis_db, host: master.endpoint, port: master.port, timeout: config.redis_timeout
-    Redis::Namespace.new config.redis_namespace, redis: raw_redis
+    RedisWrapper.new
   end
 end

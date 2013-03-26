@@ -1,7 +1,7 @@
 PATH
   remote: .
   specs:
-    raidis (0.0.1)
+    raidis (0.1.0)
       redis-namespace
 
 GEM

@@ -13,7 +13,7 @@ module Raidis
     end
 
     attr_accessor :redis_namespace, :redis_timeout, :redis_db
-    attr_writer :logger, :unavailability_timeout, :master
+    attr_writer :logger, :unavailability_timeout, :master, :retries
 
     def logger
       @logger ||= begin
@@ -35,6 +35,10 @@ module Raidis
 
     def unavailability_timeout
       @unavailability_timeout ||= 15  # seconds
+    end
+
+    def retries
+      @retries ||= 1
     end
 
     def master

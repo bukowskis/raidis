@@ -1,9 +1,11 @@
 require 'spec_helper'
 
+# This is an integration test that requires a Redis server.
+
 describe Raidis do
 
-  let(:raidis)         { Raidis }
-  let(:redis)          { raidis.redis }
+  let(:raidis)      { Raidis }
+  let(:redis)       { raidis.redis }
 
   context 'when connected' do
     context 'to a Redis master' do
@@ -37,6 +39,11 @@ describe Raidis do
     context 'to a Redis slave' do
       before do
         redis.slaveof '127.0.0.1', 12345
+        raidis.reconnect!
+      end
+
+      after do
+        redis.slaveof :no, :one
       end
 
       describe '.redis' do
