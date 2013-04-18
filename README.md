@@ -1,3 +1,5 @@
+[![Build Status](https://travis-ci.org/bukowskis/raidis.png)](https://travis-ci.org/bukowskis/raidis)
+
 # Raid-is
 
 Raidis is yet another failover solution for Redis.
