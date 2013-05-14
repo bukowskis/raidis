@@ -21,7 +21,7 @@ end
 
 describe Raidis::RedisWrapper do
 
-  let(:config)        { mock(:config, retries: 3) }
+  let(:config)        { mock(:config, retries: 3, retry_interval: 0) }
   let(:backend)       { mock(:backend) }
   let(:shaky_backend) { ShakyRedis.new }
   let(:wrapper)       { Raidis::RedisWrapper.new }
@@ -71,13 +71,27 @@ describe Raidis::RedisWrapper do
         wrapper.some_redis_command.should == :shaky_result
       end
 
-      context 'when running out of retries' do
+      context 'with a retry interval' do
         before do
-          config.stub!(:retries).and_return 2
+          config.stub!(:retry_interval).and_return 10
         end
 
-        it 'finally raises a unified connection error' do
-          expect { wrapper.some_redis_command }.to raise_error(Raidis::ConnectionError)
+        it 'waits some time before each retry' do
+          wrapper.throttle.should_receive(:sleep).exactly(2).times.with(10)
+          Timecop.freeze
+          wrapper.some_redis_command.should == :shaky_result
+        end
+
+        context 'when running out of retries' do
+          before do
+            config.stub!(:retries).and_return 1
+          end
+
+          it 'finally raises a unified connection error' do
+            wrapper.throttle.should_receive(:sleep).with(10)
+            Timecop.freeze
+            expect { wrapper.some_redis_command }.to raise_error(Raidis::ConnectionError)
+          end
         end
       end
     end

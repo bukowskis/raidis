@@ -1,3 +1,5 @@
+require 'raidis/throttle'
+
 module Raidis
   class RedisWrapper
 
@@ -24,7 +26,9 @@ module Raidis
       result = block.call
     rescue Raidis::ConnectionError => exception
       # Try again a couple of times.
+      throttle.sleep_if_needed
       if (tries -= 1) >= 0
+        throttle.action!
         reconnect!
         retry
       end
@@ -79,6 +83,10 @@ module Raidis
 
     def reconnect!
       @redis = nil
+    end
+
+    def throttle
+      @throttle ||= Throttle.new config.retry_interval
     end
 
     # Internal: Establishes a brand-new, raw connection to Redis.

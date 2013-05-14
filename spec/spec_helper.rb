@@ -34,6 +34,7 @@ RSpec.configure do |config|
     Raidis.configure do |config|
       config.redis_db = 15
       config.redis_timeout = 0.5
+      config.retry_interval = 0
     end
     Raidis.config.stub!(:info_file_path).and_return mock(:info_file_path, exist?: true, readable?: true, read: '127.0.0.1')
   end

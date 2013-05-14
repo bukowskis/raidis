@@ -29,7 +29,7 @@ Raidis.redis.class # => Redis::Namespace
 
 # How does it work?
 
-Whenever you call `Raidis.redis`, the connectivity to the remote redis server is monitored. If connectivity problems occur, or you're trying to make write-calls to a Redis slave, Raidis will immediately reload the `/etc/redis_master` file and try to perform the call to Redis again (hoping to have connected to a working redis server this time). If that second attempt failed (or you set `config.retries` to `0`) a `Raidis::ConnectionError` is raised. 
+Whenever you call `Raidis.redis`, the connectivity to the remote redis server is monitored. If connectivity problems occur, or you're trying to make write-calls to a Redis slave, Raidis will immediately reload the `/etc/redis_master` file and try to perform the call to Redis again (hoping to have connected to a working redis server this time). If that second attempt failed (or you set `config.retries` to `0`) a `Raidis::ConnectionError` is raised. To prevent too many retries in too short time, there is a minimum interval that Radis will wait after every retry attempt (see config `retry_interval`, default is 3 seconds).
 
 You should not have too many retries, because you don't want the end user's browser to hang and wait too long. That's where the `#available?` feature comes in. As soon as one of those connection errors occurs, the global variable `Raidis.available?` turns from `true` to `false` and any further damage can be mitigated, by simply not making any further calls to redis. You should inform your end-users about the outage in a friendly manner. E.g. like so:
 
@@ -62,6 +62,7 @@ Raidis.configure do |config|
   config.redis_timeout   = 3  # seconds                # default is whatever Redis.new has as default
 
   config.retries = 3  # times                          # default is 1
+  config.retry_interval = 3  # seconds                 # default is 3
   config.unavailability_timeout = 60  # seconds        # default is 15 seconds
   config.info_file_path         = '/opt/redis_server'  # default is '/etc/redis_master'
 
