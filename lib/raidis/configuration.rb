@@ -30,7 +30,7 @@ module Raidis
     end
 
     def info_file_path=(path)
-      Pathname.new path
+      @info_file_path = Pathname.new path
     end
 
     def unavailability_timeout
