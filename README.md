@@ -47,7 +47,7 @@ After 15 seconds (or whichever timeout you configure), `Raidis.available?` turns
 
 # Connection Pools
 
-If you need to maintain a ConnectionPool with multiple connections to Redis (e.g. when you use [Sidekiq](https://github.com/mperham/sidekiq/issues/794)), you may use the something like `ConnectionPool.new { Raidis.redis! }` (note the exclamation mark) to populate your pool. `.raidis!` returns a new connection each time you call it. Note that `Raidis.available?` is a global variable, so if any of the pools fail, Raidis will go into unavailable mode as described above.
+If you need to maintain a ConnectionPool with multiple connections to Redis (e.g. when you use [Sidekiq](https://github.com/mperham/sidekiq/issues/794)), you may use the something like `ConnectionPool.new { Raidis.redis! }` (note the exclamation mark) to populate your pool. `.redis!` returns a new connection each time you call it. Note that `Raidis.available?` is a global variable, so if any of the pools fail, Raidis will go into unavailable mode as described above.
 
 ## Configuration
 
