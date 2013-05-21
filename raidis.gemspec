@@ -1,7 +1,7 @@
 Gem::Specification.new do |spec|
 
   spec.name        = 'raidis'
-  spec.version     = '0.2.1'
+  spec.version     = '0.2.2'
   spec.date        = '2013-03-26'
   spec.summary     = "Yet another failover wrapper around Redis."
   spec.description = "See https://github.com/bukowskis/raidis"
