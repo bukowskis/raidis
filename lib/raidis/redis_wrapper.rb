@@ -66,6 +66,7 @@ module Raidis
     def connection_errors
       [
         Redis::BaseConnectionError,
+        Redis::TimeoutError,
         IOError,
         Timeout::Error,
         Errno::EADDRNOTAVAIL,
