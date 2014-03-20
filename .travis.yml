@@ -8,7 +8,7 @@ script: bundle exec rspec
 notifications:
   hipchat:
     rooms:
-      secure: PybG3/EEGVjH1RNc6jpbIX3HVb8OD14Yfmx+Eo1LCIdtPTVI8sciMsxXNzdrMTi8VFlHb8j46PtyFO/IO/WYETsE+80+QIsO/Cxr7Q/Fu42a7C1rfy8O8yaapIuFOhpoyE3b8Ql8CTTyIz4IxAjGjJBu+sckxcuURCJlr4/1m6w=
+      secure: JeNdLh43NL9hlzRwAm9T5rjpjpJdI/cH6Er05advfT+9BTPI09U3OcDVkxlsBU5KCkItHVZcIjcRMAxDspqQ7od7a2bjUjOMTg8qZHhZPDUeXCWRCBvhAjuecvQycPekY5OUDpHlg5S5GLZ3d9W5khB4xwDQrkKoHvhp09WxfvU=
     template:
     - ! '%{author}''s %{repository}/%{branch} - <a href="%{build_url}">%{message}</a>'
     format: html
