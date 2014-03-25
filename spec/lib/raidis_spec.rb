@@ -109,7 +109,6 @@ describe Raidis do
       describe '.redis' do
         it 'detects that there is no connection' do
           Trouble.should_receive(:notify) do |exception, metadata|
-            exception.should be_instance_of Redis::CannotConnectError
             metadata[:code].should == :lost_connection
           end
           expect { redis.get(:some_key) }.to raise_error(Raidis::ConnectionError)
