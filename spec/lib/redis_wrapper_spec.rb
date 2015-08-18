@@ -19,76 +19,76 @@ class ShakyRedis
   end
 end
 
-describe Raidis::RedisWrapper do
+RSpec.describe Raidis::RedisWrapper do
 
-  let(:config)        { mock(:config, retries: 3, retry_interval: 0) }
-  let(:backend)       { mock(:backend) }
+  let(:config)        { double(:config, retries: 3, retry_interval: 0) }
+  let(:backend)       { double(:backend) }
   let(:shaky_backend) { ShakyRedis.new }
   let(:wrapper)       { Raidis::RedisWrapper.new }
 
   before do
-    wrapper.stub!(:config).and_return config
+    allow(wrapper).to receive(:config).and_return config
   end
 
   describe '#method_missing' do
     context 'with a stable connection' do
       before do
-        wrapper.stub!(:redis!).and_return backend
+        allow(wrapper).to receive(:redis!).and_return backend
       end
 
       it 'proxies everything to the backend' do
-        backend.should_receive(:any_redis_command).with(:some_key).and_return 'value'
-        wrapper.any_redis_command(:some_key).should == 'value'
+        expect(backend).to receive(:any_redis_command).with(:some_key).and_return 'value'
+        expect(wrapper.any_redis_command(:some_key)).to eq('value')
       end
 
       it 'passes on Exceptions from the backend' do
-        backend.should_receive(:invalid_redis_command).and_raise Redis::CommandError
+        expect(backend).to receive(:invalid_redis_command).and_raise Redis::CommandError
         expect { wrapper.invalid_redis_command }.to raise_error(Redis::CommandError)
       end
 
       it 'raises a Raidis::ConnectionError if the backend could not be instantiated' do
-        wrapper.stub!(:redis)
+        allow(wrapper).to receive(:redis)
         expect { wrapper.redis_command }.to raise_error(Raidis::ConnectionError)
       end
 
       it 'wraps the call in reloading_connection' do
-        wrapper.should_receive(:reloading_connection).with(no_args()).and_return 'some_value'
-        wrapper.get(:some_key).should == 'some_value'
+        expect(wrapper).to receive(:reloading_connection).with(no_args()).and_return 'some_value'
+        expect(wrapper.get(:some_key)).to eq('some_value')
       end
 
       it 'wraps the call in observing_connection' do
-        wrapper.should_receive(:observing_connection).with(no_args()).and_return 'some_value'
-        wrapper.get(:some_key).should == 'some_value'
+        expect(wrapper).to receive(:observing_connection).with(no_args()).and_return 'some_value'
+        expect(wrapper.get(:some_key)).to eq('some_value')
       end
     end
 
     context 'with an unstable connection' do
       before do
-        wrapper.stub!(:redis!).and_return shaky_backend
+        allow(wrapper).to receive(:redis!).and_return shaky_backend
       end
 
       it 'retrieves the result even when the backend fails several times' do
-        wrapper.some_redis_command.should == :shaky_result
+        expect(wrapper.some_redis_command).to eq(:shaky_result)
       end
 
       context 'with a retry interval' do
         before do
-          config.stub!(:retry_interval).and_return 10
+          allow(config).to receive(:retry_interval).and_return 10
         end
 
         it 'waits some time before each retry' do
-          wrapper.throttle.should_receive(:sleep).exactly(2).times.with(10)
+          expect(wrapper.throttle).to receive(:sleep).exactly(2).times.with(10)
           Timecop.freeze
-          wrapper.some_redis_command.should == :shaky_result
+          expect(wrapper.some_redis_command).to eq(:shaky_result)
         end
 
         context 'when running out of retries' do
           before do
-            config.stub!(:retries).and_return 1
+            allow(config).to receive(:retries).and_return 1
           end
 
           it 'finally raises a unified connection error' do
-            wrapper.throttle.should_receive(:sleep).with(10)
+            expect(wrapper.throttle).to receive(:sleep).with(10)
             Timecop.freeze
             expect { wrapper.some_redis_command }.to raise_error(Raidis::ConnectionError)
           end

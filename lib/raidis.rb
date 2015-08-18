@@ -48,4 +48,5 @@ module Raidis
   def redis!
     RedisWrapper.new
   end
+
 end

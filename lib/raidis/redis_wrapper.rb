@@ -9,7 +9,8 @@ module Raidis
     # Raises Raidis::ConnectionError if there is a connection problem.
     #
     def method_missing(method, *args, &block)
-      raise(Raidis::ConnectionError, 'No Redis backend found.') unless redis
+      fail(Raidis::ConnectionError, 'No Redis backend found.') unless redis
+
       reloading_connection do
         observing_connection { redis.send(method, *args, &block) }
       end
@@ -24,6 +25,7 @@ module Raidis
     def reloading_connection(&block)
       tries ||= config.retries
       result = block.call
+
     rescue Raidis::ConnectionError => exception
       # Try again a couple of times.
       throttle.sleep_if_needed
@@ -100,7 +102,7 @@ module Raidis
 
     def redis!
       return unless master = config.master
-      raw_redis = Redis.new db: config.redis_db, host: master.endpoint, port: master.port, timeout: config.redis_timeout
+      raw_redis = Redis.new db: config.redis_db, host: master.endpoint, port: master.port, timeout: config.redis_timeout, connect_timeout: config.redis_timeout
       Redis::Namespace.new config.redis_namespace, redis: raw_redis
     end
 

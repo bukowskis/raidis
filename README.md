@@ -1,3 +1,4 @@
+[![Gem version](https://img.shields.io/gem/v/raidis.svg)](https://rubygems.org/gems/raidis)
 [![Build Status](https://travis-ci.org/bukowskis/raidis.png)](https://travis-ci.org/bukowskis/raidis)
 
 # Raid-is
@@ -6,13 +7,13 @@ Raidis is yet another failover solution for Redis.
 
 ## Why not use RedisFailover?
 
-* Firstly, because RedisFailover may fail itself (it depends on Zookeeper, remember?), while the Redis server is perfectly healthy
-* Seondly, RedisFailover is utterly incompatible with the thread'n'fork chaos introduced by Resque workers
-* Thirdly, if you have but one single application not using Ruby, you'll have to come up with a _global_ failover solution anyway
+* Firstly, because RedisFailover may fail itself (it depends on Zookeeper, remember?), while the Redis server is perfectly healthy (been there, done that)
+* Seondly, RedisFailover is utterly incompatible with the thread'n'fork chaos introduced by Sidekiq/Resque workers
+* We propose that your Redis failover solution is independent of Ruby, because you may have an app using Redis which simply is not a ruby app.
 
 ## How do I get started?
 
-Raidis knows where the redis master is by checking the file `/etc/redis_master` and there looking for content such as `127.0.0.1:6379` (you can omit the port if you like to). Note that you can use a RedisFailover daemon to update that file if you wish. At any rate, you won't need to use `Redis.new` or `RedisFailover.new` anymore. You'll find your ready-to-go redis in `Raidis.redis` with zero-configuration in your application.
+Raidis knows where the redis master is by checking the file `/etc/redis_master` and there looking for content such as `127.0.0.1:6379` (you can omit the port if you like to). Note that you can use a RedisFailover daemon to update that file if you wish (or whichever solution you come up with). At any rate, you won't need to use `Redis.new` or `RedisFailover.new` anymore. You'll find your ready-to-go redis in `Raidis.redis` with zero-configuration in your application.
 
 ```bash
 # Bash

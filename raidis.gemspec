@@ -1,7 +1,7 @@
 Gem::Specification.new do |spec|
 
   spec.name        = 'raidis'
-  spec.version     = '0.2.4'
+  spec.version     = '0.3.0'
   spec.date        = '2014-01-10'
   spec.summary     = "Yet another failover wrapper around Redis."
   spec.description = "See https://github.com/bukowskis/raidis"
@@ -16,5 +16,6 @@ Gem::Specification.new do |spec|
   spec.add_development_dependency('guard-rspec')
   spec.add_development_dependency('rb-fsevent')
   spec.add_development_dependency('timecop')
+  spec.add_development_dependency('rb-readline')
 
 end

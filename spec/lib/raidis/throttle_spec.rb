@@ -1,18 +1,18 @@
 require 'spec_helper'
 
-describe Raidis::Throttle do
+RSpec.describe Raidis::Throttle do
 
   let(:interval) { 3 }
   let(:throttle) { Raidis::Throttle.new }
 
   before do
-    Raidis::Throttle.stub!(:sleep)
+    allow(Raidis::Throttle).to receive(:sleep)
   end
 
   context 'no action took place yet' do
     describe '#sleep_if_needed' do
       it 'does not sleep' do
-        throttle.should_not_receive(:sleep)
+        expect(throttle).not_to receive(:sleep)
         throttle.sleep_if_needed
       end
     end
@@ -27,7 +27,7 @@ describe Raidis::Throttle do
 
     describe '#sleep_if_needed' do
       it 'sleeps for 2 seconds' do
-        throttle.should_receive(:sleep).with(2)
+        expect(throttle).to receive(:sleep).with(2)
         throttle.sleep_if_needed
       end
     end
@@ -42,7 +42,7 @@ describe Raidis::Throttle do
 
     describe '#sleep_if_needed' do
       it 'sleeps for 1 seconds' do
-        throttle.should_receive(:sleep).with(1)
+        expect(throttle).to receive(:sleep).with(1)
         throttle.sleep_if_needed
       end
     end
@@ -57,7 +57,7 @@ describe Raidis::Throttle do
 
     describe '#sleep_if_needed' do
       it 'does not sleep' do
-        throttle.should_not_receive(:sleep)
+        expect(throttle).not_to receive(:sleep)
         throttle.sleep_if_needed
       end
     end

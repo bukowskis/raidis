@@ -2,7 +2,7 @@ require 'spec_helper'
 
 # This is an integration test that requires a Redis server.
 
-describe Raidis do
+RSpec.describe Raidis do
 
   let(:raidis)      { Raidis }
   let(:redis)       { raidis.redis }
@@ -15,7 +15,7 @@ describe Raidis do
 
       describe '.redis' do
         it 'is is a RedisWrapper' do
-          redis.should be_instance_of Raidis::RedisWrapper
+          expect(redis).to be_instance_of Raidis::RedisWrapper
         end
 
         it 'lets through command errors unrelated to the connection' do
@@ -25,13 +25,13 @@ describe Raidis do
 
       describe '.connected?' do
         it 'is true' do
-          raidis.should be_connected
+          expect(raidis).to be_connected
         end
       end
 
       describe '.available?' do
         it 'is true' do
-          raidis.should be_available
+          expect(raidis).to be_available
         end
       end
     end
@@ -48,15 +48,15 @@ describe Raidis do
 
       describe '.redis' do
         it 'detects illegal writes to a slave' do
-          Trouble.should_receive(:notify) do |exception, metadata|
-            exception.should be_instance_of Redis::CommandError
-            metadata[:code].should == :readonly
+          expect(Trouble).to receive(:notify) do |exception, metadata|
+            expect(exception).to be_instance_of Redis::CommandError
+            expect(metadata[:code]).to eq(:readonly)
           end
           expect { redis.setex(:writing, 1, :against_a_slave) }.to raise_error(Raidis::ConnectionError)
         end
 
         it 'is fine with read-only commands' do
-          redis.get(:some_key).should be_nil
+          expect(redis.get(:some_key)).to be_nil
         end
 
         it 'lets through command errors unrelated to the connection' do
@@ -66,13 +66,13 @@ describe Raidis do
 
       describe '.connected?' do
         it 'is false' do
-          raidis.should_not be_connected
+          expect(raidis).not_to be_connected
         end
       end
 
       describe '.available?' do
         it 'is false' do
-          raidis.should_not be_available
+          expect(raidis).not_to be_available
         end
       end
     end
@@ -91,25 +91,26 @@ describe Raidis do
 
       describe '.available?' do
         it 'becomes available again after the unavailability_timeout' do
-          raidis.should_not be_available
+          expect(raidis).not_to be_available
           Timecop.travel Time.now + 4
-          raidis.should_not be_available
+          expect(raidis).not_to be_available
           Timecop.travel Time.now + 1
-          raidis.should be_available
+          expect(raidis).to be_available
         end
       end
     end
 
     context 'because the Network is unreachable' do
       before do
+        Raidis.redis
         Raidis.config.master = '192.0.2.1'  # RFC 5737
         Raidis.reconnect!
       end
 
       describe '.redis' do
         it 'detects that there is no connection' do
-          Trouble.should_receive(:notify) do |exception, metadata|
-            metadata[:code].should == :lost_connection
+          expect(Trouble).to receive(:notify) do |exception, metadata|
+            expect(metadata[:code]).to eq(:lost_connection)
           end
           expect { redis.get(:some_key) }.to raise_error(Raidis::ConnectionError)
         end
@@ -117,13 +118,13 @@ describe Raidis do
 
       describe '.connected?' do
         it 'is false' do
-          raidis.should_not be_connected
+          expect(raidis).not_to be_connected
         end
       end
 
       describe '.available?' do
         it 'is false' do
-          raidis.should_not be_available
+          expect(raidis).not_to be_available
         end
       end
     end
@@ -136,9 +137,9 @@ describe Raidis do
 
       describe '.redis' do
         it 'detects that there is no connection' do
-          Trouble.should_receive(:notify) do |exception, metadata|
-            exception.should be_instance_of Redis::CannotConnectError
-            metadata[:code].should == :lost_connection
+          expect(Trouble).to receive(:notify) do |exception, metadata|
+            expect(exception).to be_instance_of Redis::CannotConnectError
+            expect(metadata[:code]).to eq(:lost_connection)
           end
           expect { redis.get(:some_key) }.to raise_error(Raidis::ConnectionError)
         end
@@ -146,13 +147,13 @@ describe Raidis do
 
       describe '.connected?' do
         it 'is false' do
-          raidis.should_not be_connected
+          expect(raidis).not_to be_connected
         end
       end
 
       describe '.available?' do
         it 'is false' do
-          raidis.should_not be_available
+          expect(raidis).not_to be_available
         end
       end
     end

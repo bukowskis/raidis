@@ -1,45 +1,26 @@
-require 'timecop'
 require 'raidis'
-
-def ensure_class_or_module(full_name, class_or_module)
-  full_name.to_s.split(/::/).inject(Object) do |context, name|
-    begin
-      context.const_get(name)
-    rescue NameError
-      if class_or_module == :class
-        context.const_set(name, Class.new)
-      else
-        context.const_set(name, Module.new)
-      end
-    end
-  end
-end
-
-def ensure_module(name)
-  ensure_class_or_module(name, :module)
-end
-
-def ensure_class(name)
-  ensure_class_or_module(name, :class)
-end
-
-ensure_module :Trouble
+require 'timecop'
 
 RSpec.configure do |config|
 
-  # Global before hook
+  config.raise_errors_for_deprecations!
+  config.disable_monkey_patching!
+  config.color = true
+
   config.before do
-    Trouble.stub!(:notify)
+    stub_const 'Trouble', double(:trouble)
+    allow(Trouble).to receive :notify
 
     Raidis.configure do |config|
       config.redis_db = 15
-      config.redis_timeout = 0.5
+      config.redis_timeout = 0.1
       config.retry_interval = 0
     end
-    Raidis.config.stub!(:info_file_path).and_return mock(:info_file_path, exist?: true, readable?: true, read: '127.0.0.1')
+
+    pathname = double :info_file_path, exist?: true, readable?: true, read: '127.0.0.1'
+    allow(Raidis.config).to receive(:info_file_path).and_return pathname
   end
 
-  # Global after hooks
   config.after do
     Raidis.reset!
     Timecop.return
