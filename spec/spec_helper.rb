@@ -22,7 +22,8 @@ RSpec.configure do |config|
   end
 
   config.after do
-    Raidis.reset!
+    Raidis.reset_configuration!
+    Raidis.reconnect!
     Timecop.return
   end
 

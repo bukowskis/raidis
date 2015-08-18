@@ -74,20 +74,3 @@ module Raidis
     end
   end
 end
-
-module Raidis
-  extend self
-
-  def config
-    @config ||= Configuration.new
-  end
-
-  def configure(&block)
-    yield config
-  end
-
-  def reset!
-    config = nil
-    reconnect!
-  end
-end

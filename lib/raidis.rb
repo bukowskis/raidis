@@ -3,6 +3,7 @@ require 'timeout'
 
 require 'raidis/availability'
 require 'raidis/configuration'
+require 'raidis/configurable'
 require 'raidis/redis_wrapper'
 
 module Raidis
@@ -30,6 +31,7 @@ module Raidis
   def connected?
     return unavailable! unless @redis
     @redis.setex(:raidis, 1, :rocks) && available!
+
   rescue Raidis::ConnectionError
     unavailable!
   end

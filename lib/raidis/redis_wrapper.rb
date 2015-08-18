@@ -3,6 +3,12 @@ require 'raidis/throttle'
 module Raidis
   class RedisWrapper
 
+    attr_reader :identifier
+
+    def initialize(identifier = :default)
+      @identifier = identifier
+    end
+
     # Public: Proxies everything to the Redis backend.
     #
     # Returns whatever the backend returns.
@@ -109,7 +115,7 @@ module Raidis
     # Internal: Convenience wrapper
     #
     def config
-      Raidis.config
+      Raidis.config identifier
     end
   end
 end

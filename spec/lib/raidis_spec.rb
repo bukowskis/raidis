@@ -1,7 +1,5 @@
 require 'spec_helper'
 
-# This is an integration test that requires a Redis server.
-
 RSpec.describe Raidis do
 
   let(:raidis)      { Raidis }
