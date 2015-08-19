@@ -56,7 +56,14 @@ module Raidis
       yield
 
     rescue *connection_errors => exception
-      Trouble.notify(exception, code: :lost_connection, message: 'Raidis lost connection to the Redis server.', client: redis.inspect) if defined?(Trouble)
+      if defined?(Trouble)
+        if Trouble.respond_to? :log  # Requires Trouble > 0.0.11
+          Trouble.log exception, code: :lost_connection, message: 'Raidis lost connection to the Redis server.', client: redis.inspect
+        else
+          Trouble.notify exception, code: :lost_connection, message: 'Raidis lost connection to the Redis server.', client: redis.inspect
+        end
+      end
+
       raise Raidis::ConnectionError, exception
 
     rescue Redis::CommandError => exception

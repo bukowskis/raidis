@@ -4,6 +4,7 @@ RSpec.describe Raidis do
 
   let(:raidis)      { Raidis }
   let(:redis)       { raidis.redis }
+  let(:other_redis) { raidis.redis(:other) }
 
   context 'when connected' do
     context 'to a Redis master' do
@@ -22,8 +23,16 @@ RSpec.describe Raidis do
       end
 
       describe '.connected?' do
-        it 'is true' do
-          expect(raidis).to be_connected
+        context 'default redis' do
+          it 'is true' do
+            expect(raidis).to be_connected
+          end
+        end
+
+        context 'other redis' do
+          it 'is true' do
+            expect(raidis.connected?(:other)).to be_truthy
+          end
         end
       end
 
@@ -45,7 +54,7 @@ RSpec.describe Raidis do
       end
 
       describe '.redis' do
-        it 'detects illegal writes to a slave' do
+        it 'notifies about illegal writes to a slave' do
           expect(Trouble).to receive(:notify) do |exception, metadata|
             expect(exception).to be_instance_of Redis::CommandError
             expect(metadata[:code]).to eq(:readonly)
@@ -69,8 +78,16 @@ RSpec.describe Raidis do
       end
 
       describe '.available?' do
-        it 'is false' do
-          expect(raidis).not_to be_available
+        context 'same namespace' do
+          it 'is false' do
+            expect(raidis).not_to be_available
+          end
+        end
+
+        context 'other namespace' do
+          it 'is false' do
+            expect(raidis.available?(:other)).to be_falsey
+          end
         end
       end
     end
@@ -90,10 +107,13 @@ RSpec.describe Raidis do
       describe '.available?' do
         it 'becomes available again after the unavailability_timeout' do
           expect(raidis).not_to be_available
+          #expect(raidis.available?(:other)).to be_truthy
           Timecop.travel Time.now + 4
           expect(raidis).not_to be_available
+          #expect(raidis.available?(:other)).to be_truthy
           Timecop.travel Time.now + 1
           expect(raidis).to be_available
+          #expect(raidis.available?(:other)).to be_truthy
         end
       end
     end
@@ -107,7 +127,7 @@ RSpec.describe Raidis do
 
       describe '.redis' do
         it 'detects that there is no connection' do
-          expect(Trouble).to receive(:notify) do |exception, metadata|
+          expect(Trouble).to receive(:log) do |exception, metadata|
             expect(metadata[:code]).to eq(:lost_connection)
           end
           expect { redis.get(:some_key) }.to raise_error(Raidis::ConnectionError)
@@ -134,12 +154,28 @@ RSpec.describe Raidis do
       end
 
       describe '.redis' do
-        it 'detects that there is no connection' do
-          expect(Trouble).to receive(:notify) do |exception, metadata|
-            expect(exception).to be_instance_of Redis::CannotConnectError
-            expect(metadata[:code]).to eq(:lost_connection)
+        context 'Trouble can handle log' do
+          it 'logs that there is no connection' do
+            expect(Trouble).to receive(:log) do |exception, metadata|
+              expect(exception).to be_instance_of Redis::CannotConnectError
+              expect(metadata[:code]).to eq(:lost_connection)
+            end
+            expect { redis.get(:some_key) }.to raise_error(Raidis::ConnectionError)
           end
-          expect { redis.get(:some_key) }.to raise_error(Raidis::ConnectionError)
+        end
+
+        context 'Trouble cannot handle log' do
+          before do
+            allow(Trouble).to receive(:respond_to?).with(:log)
+          end
+
+          it 'notifies that there is no connection' do
+            expect(Trouble).to receive(:notify) do |exception, metadata|
+              expect(exception).to be_instance_of Redis::CannotConnectError
+              expect(metadata[:code]).to eq(:lost_connection)
+            end
+            expect { redis.get(:some_key) }.to raise_error(Raidis::ConnectionError)
+          end
         end
       end
 

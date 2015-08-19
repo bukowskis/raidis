@@ -1,33 +1,41 @@
 module Raidis
   module Availability
 
-    def available?
+    def available?(identifier = :default)
       if unavailability_age_in_seconds >= config.unavailability_timeout
-        available!
+        available! identifier
       else
-        !!@available
+        !!availables[identifier]
       end
     end
 
-    def available!
+    def available!(identifier = :default)
       checking_availability
-      @available = true
+      availables[identifier] = true
     end
 
-    def unavailable!
+    def unavailable!(identifier = :default)
       checking_availability
-      @available = false
+      availables[identifier] = false
     end
 
     private
 
-    def checking_availability
-      @last_availability_check = Time.now.to_i
+    def availables
+      @availables ||= {}
     end
 
-    def unavailability_age_in_seconds
-      return 0 unless @last_availability_check
-      Time.now.to_i - @last_availability_check.to_i
+    def last_availability_checks
+      @last_availability_checks ||= {}
+    end
+
+    def checking_availability(identifier = :default)
+      last_availability_checks[identifier] = Time.now.to_i
+    end
+
+    def unavailability_age_in_seconds(identifier = :default)
+      return 0 unless last_availability_checks[identifier]
+      Time.now.to_i - last_availability_checks[identifier].to_i
     end
 
   end

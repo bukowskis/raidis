@@ -8,7 +8,7 @@ require 'raidis/redis_wrapper'
 
 module Raidis
 
-  ConnectionError = Class.new(RuntimeError)
+  ConnectionError = Class.new RuntimeError
 
   extend self
   extend Availability
@@ -17,30 +17,30 @@ module Raidis
   #
   # Returns a RedisWrapper instance.
   #
-  def redis
-    return @redis if @redis
-    @redis = redis!
-    connected?
-    @redis
+  def redis(identifier = :default)
+    return redises[identifier] if redises[identifier]
+    redises[identifier] = redis!
+    connected? identifier
+    redises[identifier]
   end
 
   # Public: Updates the #available? flag by actually testing the Redis connection.
   #
   # Returns true or false.
   #
-  def connected?
-    return unavailable! unless @redis
-    @redis.setex(:raidis, 1, :rocks) && available!
+  def connected?(identifier = :default)
+    return unavailable!(identifier) unless redises[identifier]
+    @redises[identifier].setex(:raidis, 1, :rocks) && available!
 
   rescue Raidis::ConnectionError
-    unavailable!
+    unavailable! identifier
   end
 
   # Public: Evokes a fresh lookup of the Redis server endpoint.
   #
-  def reconnect!
-    @redis = nil
-    redis
+  def reconnect!(identifier = :default)
+    @redises = nil
+    redis identifier
   end
 
   # Public: Creates a brand-new failsafe-wrapped connection to Redis.
@@ -49,6 +49,12 @@ module Raidis
   #
   def redis!
     RedisWrapper.new
+  end
+
+  private
+
+  def redises
+    @redises ||= {}
   end
 
 end
